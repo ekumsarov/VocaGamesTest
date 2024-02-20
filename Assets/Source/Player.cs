@@ -11,12 +11,13 @@ public class Player : MonoBehaviour
     private float _timeStamp;
     private MoveState _moveState;
     private StateContainer _currentState;
+    private List<IAbility> _abilities;
 
     [SerializeField]
     private MeshRenderer _meshRenderer;
 
-    public Action<StateContainer> StateChanged;
-    public Action<Vector3> PositionChanged;
+    public Action<StateContainer> OnStateChanged;
+    public Action<Vector3> OnPositionChanged;
     
     public void Initialize(MoveState state)
     {
@@ -27,10 +28,20 @@ public class Player : MonoBehaviour
                 throw new ArgumentNullException();
         }
 
+        _abilities = new List<IAbility>();
         transform.position = new Vector3(0f, 0f, 0f);
         _timeStamp = 0f;
         _moveState = state;
-        _currentState = _moveState.NextState();
+        _currentState = new StateContainer(Vector3.zero, 0f);
+
+        _abilities.Add(new DistanceAbility());
+        _abilities.Add(new SpeedAbility());
+
+        for(int i = 0; i < _abilities.Count; i++)
+        {
+            _abilities[i].InitializeAbility(this);
+        }
+
         gameObject.SetActive(true);
     }
 
@@ -39,17 +50,34 @@ public class Player : MonoBehaviour
     {
         Vector3 acceleration = _currentState.Direction * _currentState.Speed * Time.deltaTime;
         transform.position += acceleration;
-        PositionChanged?.Invoke(transform.position);
+        OnPositionChanged?.Invoke(transform.position);
 
         _timeStamp += Time.deltaTime;
         if(_timeStamp >= 1f)
         {
             _currentState = _moveState.NextState();
             if(_currentState == null)
-                Destroy(gameObject);
+            {
+                DestroyPlayer();
+            }
+                
 
             _timeStamp = 0f;
-            StateChanged?.Invoke(_currentState);
+            OnStateChanged?.Invoke(_currentState);
         }
+    }
+
+    public void SetColor(Color color)
+    {
+        _meshRenderer.material.color = color;
+    }
+
+    public void DestroyPlayer()
+    {
+        for(int i = 0; i < _abilities.Count; i++)
+        {
+            _abilities[i].Dispose();
+        }
+        Destroy(gameObject);
     }
 }

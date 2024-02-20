@@ -10,7 +10,7 @@ public class MoveState
     public MoveState()
     {
         _states = new List<StateContainer>();
-        _currentState = -1;
+        _currentState = 0;
     }
 
     public MoveState(List<StateContainer> states)
@@ -18,7 +18,10 @@ public class MoveState
         if(states == null || states.Count == 0)
             _states = new List<StateContainer>();
         else
+        {
             _states = states;
+        }
+            
 
         _currentState = -1;
     }

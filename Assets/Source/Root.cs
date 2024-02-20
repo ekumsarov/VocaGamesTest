@@ -15,7 +15,7 @@ public class Root : MonoBehaviour
         _states = new List<StateContainer>();
         _mainPlayer = GameObject.Instantiate<Player>(_prefab);
         _mainPlayer.Initialize(new MoveState());
-        _mainPlayer.StateChanged += StateChanged;
+        _mainPlayer.OnStateChanged += StateChanged;
     }
 
 
@@ -23,15 +23,15 @@ public class Root : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.R))
         {
-            _mainPlayer.StateChanged -= StateChanged;
-            Destroy(_mainPlayer.gameObject);
+            _mainPlayer.OnStateChanged -= StateChanged;
+            _mainPlayer.DestroyPlayer();
 
             GameObject.Instantiate<Player>(_prefab).Initialize(new MoveState(_states));
             _states = new List<StateContainer>();
 
             _mainPlayer = GameObject.Instantiate<Player>(_prefab);
             _mainPlayer.Initialize(new MoveState());
-            _mainPlayer.StateChanged += StateChanged;
+            _mainPlayer.OnStateChanged += StateChanged;
             
         }
     }
